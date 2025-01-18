@@ -1,5 +1,6 @@
 from PIL import Image
 import numpy as np
+import argparse
 
 def convert_to_ascii(
     image_path, 
@@ -7,9 +8,9 @@ def convert_to_ascii(
     palette=" .'`^\",:;Il!i><~+_-?][}{1)(|/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$",
     target_width=202, 
     target_height=80,
-    ocean_color=(0, 0, 255),    # Default ocean color (blue)
-    ocean_char=":",             # Character to use for ocean
-    color_threshold=30          # Tolerance for color matching
+    ocean_colors=[(0, 6, 20)],  # List of ocean colors
+    ocean_char=" ",            # Character to use for ocean
+    color_threshold=10         # Tolerance for color matching
 ):
     """
     Convert a map image to ASCII art with uniform ocean and shaded land areas.
@@ -20,7 +21,7 @@ def convert_to_ascii(
         palette (str): Characters to use for land ASCII conversion, from darkest to brightest
         target_width (int): Width of the output ASCII art
         target_height (int): Height of the output ASCII art
-        ocean_color (tuple): RGB values for the ocean color to mask
+        ocean_colors (list): List of RGB tuples for ocean colors to mask
         ocean_char (str): Character to use for ocean areas
         color_threshold (int): Threshold for color matching (0-255)
     """
@@ -47,9 +48,15 @@ def convert_to_ascii(
         for x in range(target_width):
             pixel_rgb = rgb_pixels[y, x]
             
-            # Check if pixel is ocean
-            color_diff = sum(abs(c1 - c2) for c1, c2 in zip(pixel_rgb, ocean_color))
-            if color_diff <= color_threshold * 3:
+            # Check if pixel matches any ocean color
+            is_ocean = False
+            for ocean_color in ocean_colors:
+                color_diff = sum(abs(c1 - c2) for c1, c2 in zip(pixel_rgb, ocean_color))
+                if color_diff <= color_threshold * 3:
+                    is_ocean = True
+                    break
+            
+            if is_ocean:
                 ascii_row += ocean_char
             else:
                 # Convert land pixel to ASCII based on brightness
@@ -63,26 +70,40 @@ def convert_to_ascii(
     with open(output_path, 'w') as f:
         f.write('\n'.join(ascii_art))
 
+def parse_color(s):
+    """Parse a color string in format 'R,G,B'"""
+    try:
+        r, g, b = map(int, s.split(','))
+        return (r, g, b)
+    except:
+        raise argparse.ArgumentTypeError("Color must be in format 'R,G,B'")
+
 def main():
-    # Example usage
-    image_path = "input_image.png"  # Replace with your image path
-    output_path = "textures/ascii_texture.txt"
+    parser = argparse.ArgumentParser(description='Convert an image to ASCII art with ocean masking')
+    parser.add_argument('--image_path', type=str, default="input_image.png", help='Path to the input image')
+    parser.add_argument('--output_path', type=str, default="textures\\ascii_texture.txt", help='Path for the output text file')
+    parser.add_argument('--width', type=int, default=202, help='Width of output ASCII art')
+    parser.add_argument('--height', type=int, default=80, help='Height of output ASCII art')
+    parser.add_argument('--palette', default=" .:;',wiogOLXHWYV@", help='ASCII characters for land, from darkest to brightest')
+    parser.add_argument('--ocean-colors', type=parse_color, nargs='+', default=[(0,6,20)], 
+                      help='Ocean colors in R,G,B format (can specify multiple)')
+    parser.add_argument('--ocean-char', default=" ", help='Character to use for ocean')
+    parser.add_argument('--threshold', type=int, default=10, help='Color matching threshold (0-255)')
     
-    # Custom palette for land (from darkest to brightest)
-    custom_palette = " .:;',wiogOLXHWYV@"
+    args = parser.parse_args()
     
     try:
         convert_to_ascii(
-            image_path=image_path,
-            output_path=output_path,
-            palette=custom_palette,
-            target_width=202,
-            target_height=80,
-            ocean_color=(1,4,19),  # Blue for ocean
-            ocean_char=".",           # Use colon for ocean
-            color_threshold=20        # Adjust this value based on your needs
+            image_path=args.image_path,
+            output_path=args.output_path,
+            palette=args.palette,
+            target_width=args.width,
+            target_height=args.height,
+            ocean_colors=args.ocean_colors,
+            ocean_char=args.ocean_char,
+            color_threshold=args.threshold
         )
-        print(f"ASCII texture has been saved to {output_path}")
+        print(f"ASCII texture has been saved to {args.output_path}")
     except Exception as e:
         print(f"Error: {e}")
 
