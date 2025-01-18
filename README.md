@@ -8,6 +8,7 @@ ASCII-Globe is a Python script that renders a 3D representation of the Earth in 
 - Supports day and night textures.
 - Real-time rotation.
 - Adjustable scale, rotation speed, and axial tilt.
+- Toggle lighting/night effect.
 
 ## Installation
 
@@ -43,7 +44,7 @@ python generate_texture.py --image_path downloads/nasa_night.jpg --output_path t
 Run the script with optional arguments to adjust the rendering settings:
 
 ```sh
-python render.py [--scale SCALE] [--speed SPEED] [--tilt TILT] [--sleep SLEEP]
+python render.py [--scale SCALE] [--speed SPEED] [--tilt TILT] [--sleep SLEEP] [--lighting LIGHTING]
 ```
 
 ## Arguments
@@ -51,11 +52,12 @@ python render.py [--scale SCALE] [--speed SPEED] [--tilt TILT] [--sleep SLEEP]
 - --speed: Rotation speed multiplier (default: 1.0)
 - --tilt: Axial tilt in degrees (default: 23.5)
 - --sleep: Sleep to allow reading settings (default: True)
+- --lighting: Toggle lighting/night effect (default: True)
 
 ## Example
 
 ```sh
-python render.py --scale 1.5 --speed 2.0 --tilt 23.5 --sleep False
+python render.py --scale 1.5 --speed 2.0 --tilt 23.5 --sleep False --lighting False
 ```
 
 ## License

@@ -21,6 +21,18 @@ DEFAULT_SCALE = 1.0
 DEFAULT_SPEED = 1.0
 DEFAULT_TILT = 23.5  # Earth's natural tilt in degrees
 DEFAULT_SLEEP = True  # Default sleep to allow reading settings
+DEFAULT_LIGHTING = True  # Default lighting effect
+
+def str2bool(v):
+    # Why doesn't argparse support bool? This is outrageous!
+    if isinstance(v, bool):
+        return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description='Earth Console Renderer')
@@ -32,6 +44,8 @@ def parse_arguments():
                       help=f'Axial tilt in degrees (default: {DEFAULT_TILT})')
     parser.add_argument('--sleep', type=bool, default=DEFAULT_SLEEP,
                       help=f'Sleep to allow reading settings (default: {DEFAULT_SLEEP})')
+    parser.add_argument('--lighting', type=str2bool, default=DEFAULT_LIGHTING,
+                      help=f'Toggle lighting/night effect (default: {DEFAULT_LIGHTING})')
     return parser.parse_args()
 
 def clear_screen():
@@ -117,7 +131,7 @@ class Camera:
             self.x, self.y, self.z, 1
         ]
 
-    def render_sphere(self, canvas, radius, angle_offset, earth, earth_night, scale=1.0, tilt=23.5):
+    def render_sphere(self, canvas, radius, angle_offset, earth, earth_night, scale=1.0, tilt=23.5, lighting=True):
         light = [0, 999999, 0]  # Sun position
         
         # Get dimensions of the texture
@@ -160,7 +174,7 @@ class Camera:
                 
                 n = normalize(inter)
                 l = normalize(vector(light, inter))
-                luminance = clamp(5*(dot(n,l))+0.5, 0, 1)
+                luminance = clamp(5*(dot(n,l))+0.5, 0, 1) if lighting else 1.0
                 
                 # Apply tilt before calculating texture coordinates
                 temp = rotate_x(inter.copy(), -tilt_rad)
@@ -215,6 +229,7 @@ def main():
     print(f"Speed: {args.speed}x")
     print(f"Tilt: {args.tilt}°")
     print(f"Texture dimensions: {len(earth[0])}x{len(earth)}")
+    print(f"Lighting: {args.lighting}")
     print("\nPress Ctrl+C to exit...")
     
     if args.sleep:
@@ -227,7 +242,7 @@ def main():
         canvas = [[' ' for _ in range(WIDTH // dW)] for _ in range(HEIGHT // dH)]
         
         cam.render_sphere(canvas, 1, angle_offset, earth, earth_night, 
-                         scale=args.scale, tilt=args.tilt)
+                         scale=args.scale, tilt=args.tilt, lighting=args.lighting)
         
         # Display
         clear_screen()
