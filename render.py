@@ -42,7 +42,7 @@ def parse_arguments():
                       help=f'Rotation speed multiplier (default: {DEFAULT_SPEED})')
     parser.add_argument('--tilt', type=float, default=DEFAULT_TILT,
                       help=f'Axial tilt in degrees (default: {DEFAULT_TILT})')
-    parser.add_argument('--sleep', type=bool, default=DEFAULT_SLEEP,
+    parser.add_argument('--sleep', type=str2bool, default=DEFAULT_SLEEP,
                       help=f'Sleep to allow reading settings (default: {DEFAULT_SLEEP})')
     parser.add_argument('--lighting', type=str2bool, default=DEFAULT_LIGHTING,
                       help=f'Toggle lighting/night effect (default: {DEFAULT_LIGHTING})')
