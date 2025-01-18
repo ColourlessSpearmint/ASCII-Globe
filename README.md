@@ -1,3 +1,7 @@
+<div align="center">
+    <img src="images\ascii_globe.gif" alt="a globe rendered entirely in ASCII text" width="256"/>
+</div>
+
 # ASCII-Globe
 
 ASCII-Globe is a Python script that renders a 3D representation of the Earth in the console using ASCII characters. It unwraps texture files to create a rotating globe effect.
