@@ -20,6 +20,7 @@ PALETTE = " .:;',wiogOLXHWYV@"
 DEFAULT_SCALE = 1.0
 DEFAULT_SPEED = 1.0
 DEFAULT_TILT = 23.5  # Earth's natural tilt in degrees
+DEFAULT_SLEEP = True  # Default sleep to allow reading settings
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description='Earth Console Renderer')
@@ -29,6 +30,8 @@ def parse_arguments():
                       help=f'Rotation speed multiplier (default: {DEFAULT_SPEED})')
     parser.add_argument('--tilt', type=float, default=DEFAULT_TILT,
                       help=f'Axial tilt in degrees (default: {DEFAULT_TILT})')
+    parser.add_argument('--sleep', type=bool, default=DEFAULT_SLEEP,
+                      help=f'Sleep to allow reading settings (default: {DEFAULT_SLEEP})')
     return parser.parse_args()
 
 def clear_screen():
@@ -213,7 +216,9 @@ def main():
     print(f"Tilt: {args.tilt}°")
     print(f"Texture dimensions: {len(earth[0])}x{len(earth)}")
     print("\nPress Ctrl+C to exit...")
-    time.sleep(2)  # Give time to read settings
+    
+    if args.sleep:
+        time.sleep(2)  # Give time to read settings
     
     angle_offset = 0
     
