@@ -14,8 +14,9 @@ def render_frame(text, font_size=10):
     return img
 
 # Crop image to non-transparent content
-def crop_to_content(img):
-    bbox = img.getbbox()  # Get bounding box of non-transparent content
+def crop_to_content(img, bbox=None):
+    if bbox is None:
+        bbox = img.getbbox()  # Get bounding box of non-transparent content
     return img.crop(bbox) if bbox else img
 
 # Resize image to a square, choosing the larger dimension
@@ -27,9 +28,28 @@ def resize_to_square(img):
 with open("earth_frames.json", 'r') as f:
     data = json.load(f)
 
-# Process frames: render, crop, and resize
+# Render all frames
 frames = [render_frame(frame) for frame in data.get("frames", [])]
-cropped_frames = [crop_to_content(frame) for frame in frames]
+
+# Find the universal bounding box for all frames
+universal_bbox = None
+for frame in frames:
+    frame_bbox = frame.getbbox()
+    if universal_bbox is None:
+        universal_bbox = frame_bbox
+    else:
+        # Update to the union of bounding boxes across all frames
+        universal_bbox = (
+            min(universal_bbox[0], frame_bbox[0]),
+            min(universal_bbox[1], frame_bbox[1]),
+            max(universal_bbox[2], frame_bbox[2]),
+            max(universal_bbox[3], frame_bbox[3])
+        )
+
+# Crop all frames to the universal bounding box
+cropped_frames = [crop_to_content(frame, universal_bbox) for frame in frames]
+
+# Resize each cropped frame to a square
 squared_frames = [resize_to_square(frame) for frame in cropped_frames]
 
 # Convert frames to 'P' mode for GIF compatibility
