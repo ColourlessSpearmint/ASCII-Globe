@@ -3,6 +3,7 @@ import os
 import time
 import sys
 import argparse
+import json
 
 # Screen dimensions
 WIDTH = 800
@@ -19,12 +20,13 @@ PALETTE = " .:;',wiogOLXHWYV@"
 # Default parameters
 DEFAULT_SCALE = 1.0
 DEFAULT_SPEED = 1.0
-DEFAULT_TILT = 23.5  # Earth's natural tilt in degrees
-DEFAULT_SLEEP = True  # Default sleep to allow reading settings
-DEFAULT_LIGHTING = True  # Default lighting effect
+DEFAULT_TILT = 23.5
+DEFAULT_SLEEP = True
+DEFAULT_LIGHTING = True
+DEFAULT_SAVE_FRAMES = False
+DEFAULT_OUTPUT_FILE = "earth_frames.json"
 
 def str2bool(v):
-    # Why doesn't argparse support bool? This is outrageous!
     if isinstance(v, bool):
         return v
     if v.lower() in ('yes', 'true', 't', 'y', '1'):
@@ -46,6 +48,10 @@ def parse_arguments():
                       help=f'Sleep to allow reading settings (default: {DEFAULT_SLEEP})')
     parser.add_argument('--lighting', type=str2bool, default=DEFAULT_LIGHTING,
                       help=f'Toggle lighting/night effect (default: {DEFAULT_LIGHTING})')
+    parser.add_argument('--save-frames', type=str2bool, default=DEFAULT_SAVE_FRAMES,
+                      help=f'Save frames to JSON file (default: {DEFAULT_SAVE_FRAMES})')
+    parser.add_argument('--output-file', type=str, default=DEFAULT_OUTPUT_FILE,
+                      help=f'Output JSON file path (default: {DEFAULT_OUTPUT_FILE})')
     return parser.parse_args()
 
 def clear_screen():
@@ -212,47 +218,61 @@ def load_texture(filename):
         return []
 
 def main():
-    # Parse command line arguments
     args = parse_arguments()
-    
-    # Read earth textures
     earth = load_texture('textures/earth.txt')
     earth_night = load_texture('textures/earth_night.txt')
     
     if not earth or not earth_night:
-        print("Failed to load textures. Make sure earth.txt and earth_night.txt exist in the current directory.")
+        print("Failed to load textures")
         return
     
-    # Print current settings
     print(f"Earth Renderer Settings:")
     print(f"Scale: {args.scale}")
     print(f"Speed: {args.speed}x")
     print(f"Tilt: {args.tilt}°")
+    
     print(f"Texture dimensions: {len(earth[0])}x{len(earth)}")
     print(f"Lighting: {args.lighting}")
+    print(f"Save frames: {args.save_frames}")
+    if args.save_frames:
+        print(f"Output file: {args.output_file}")
     print("\nPress Ctrl+C to exit...")
     
-    if args.sleep:
-        time.sleep(2)  # Give time to read settings
-    
     angle_offset = 0
-    
-    while True:
-        cam = Camera(2, 0, 0)
-        canvas = [[' ' for _ in range(WIDTH // dW)] for _ in range(HEIGHT // dH)]
-        
-        cam.render_sphere(canvas, 1, angle_offset, earth, earth_night, 
-                         scale=args.scale, tilt=args.tilt, lighting=args.lighting)
-        
-        # Display
-        clear_screen()
-        print('\n'.join(''.join(row) for row in canvas))
-        goto_xy(0, 0)
-        
-        # Apply speed multiplier to rotation
-        angle_offset += (2*PI/18) * args.speed
-        time.sleep(0.1)  # Base delay
-
+    frames = []
+    if args.save_frames:
+        while angle_offset < 2 * PI:  # Stop after one revolution
+            cam = Camera(2, 0, 0)
+            canvas = [[' ' for _ in range(WIDTH // dW)] for _ in range(HEIGHT // dH)]
+            
+            cam.render_sphere(canvas, 1, angle_offset, earth, earth_night, 
+                            scale=args.scale, tilt=args.tilt, lighting=args.lighting)
+            
+            frame_data = '\n'.join(''.join(row) for row in canvas)
+            frames.append(frame_data)
+            
+            angle_offset += (2*PI/18) * args.speed
+            
+        print(f"\nSaving {len(frames)} frames to {args.output_file}...")
+        with open(args.output_file, 'w') as f:
+            json.dump({"frames": frames}, f)
+        print("Frames saved successfully.")
+    else:
+        while True:
+            cam = Camera(2, 0, 0)
+            canvas = [[' ' for _ in range(WIDTH // dW)] for _ in range(HEIGHT // dH)]
+            
+            cam.render_sphere(canvas, 1, angle_offset, earth, earth_night, 
+                            scale=args.scale, tilt=args.tilt, lighting=args.lighting)
+            
+            # Display
+            clear_screen()
+            print('\n'.join(''.join(row) for row in canvas))
+            goto_xy(0, 0)
+            
+            # Apply speed multiplier to rotation
+            angle_offset += (2*PI/18) * args.speed
+            time.sleep(0.1)  # Base delay
 if __name__ == "__main__":
     try:
         main()
