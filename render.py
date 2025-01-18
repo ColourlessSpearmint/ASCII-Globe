@@ -155,7 +155,8 @@ class Camera:
                 temp = rotate_x(inter.copy(), -PI*2*26/360)
                 
                 phi = -temp[2]/radius/2 + 0.5
-                theta = math.atan2(temp[1], temp[0])/PI + 0.5 + angle_offset/2/PI
+                # invert theta to flip texture horizontally
+                theta = -math.atan2(temp[1], temp[0])/PI + 0.5 + angle_offset/2/PI
                 theta -= math.floor(theta)
                 
                 earthX = int(theta * (texture_width - 1))
