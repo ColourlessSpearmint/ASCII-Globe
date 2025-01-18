@@ -2,6 +2,7 @@ import math
 import os
 import time
 import sys
+import argparse
 
 # Screen dimensions
 WIDTH = 800
@@ -14,6 +15,21 @@ dH = 8
 # Constants
 PI = math.pi
 PALETTE = " .:;',wiogOLXHWYV@"
+
+# Default parameters
+DEFAULT_SCALE = 1.0
+DEFAULT_SPEED = 1.0
+DEFAULT_TILT = 23.5  # Earth's natural tilt in degrees
+
+def parse_arguments():
+    parser = argparse.ArgumentParser(description='Earth Console Renderer')
+    parser.add_argument('--scale', type=float, default=DEFAULT_SCALE,
+                      help=f'Scale of the Earth (default: {DEFAULT_SCALE})')
+    parser.add_argument('--speed', type=float, default=DEFAULT_SPEED,
+                      help=f'Rotation speed multiplier (default: {DEFAULT_SPEED})')
+    parser.add_argument('--tilt', type=float, default=DEFAULT_TILT,
+                      help=f'Axial tilt in degrees (default: {DEFAULT_TILT})')
+    return parser.parse_args()
 
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
@@ -98,22 +114,7 @@ class Camera:
             self.x, self.y, self.z, 1
         ]
 
-    def convert(self, tx, ty, tz):
-        vec = [tx, ty, tz]
-        vec = transform_vector(vec, self.matrix)
-        if vec[2] > 0:
-            return None
-            
-        xI = -vec[0]/vec[2]
-        yI = -vec[1]/vec[2]
-        xI *= WIDTH/dW/2
-        yI *= WIDTH/dH/2
-        xI += WIDTH/dW/2
-        yI += HEIGHT/dH/2
-        
-        return [int(xI), int(yI)]
-
-    def render_sphere(self, canvas, radius, angle_offset, earth, earth_night):
+    def render_sphere(self, canvas, radius, angle_offset, earth, earth_night, scale=1.0, tilt=23.5):
         light = [0, 999999, 0]  # Sun position
         
         # Get dimensions of the texture
@@ -123,6 +124,12 @@ class Camera:
         if texture_height == 0 or texture_width == 0:
             print("Error: Invalid texture dimensions")
             return
+        
+        # Apply scale to radius
+        radius *= scale
+        
+        # Convert tilt to radians
+        tilt_rad = math.radians(tilt)
         
         for yi in range(HEIGHT // dH):
             for xi in range(WIDTH // dW):
@@ -152,10 +159,10 @@ class Camera:
                 l = normalize(vector(light, inter))
                 luminance = clamp(5*(dot(n,l))+0.5, 0, 1)
                 
-                temp = rotate_x(inter.copy(), -PI*2*26/360)
+                # Apply tilt before calculating texture coordinates
+                temp = rotate_x(inter.copy(), -tilt_rad)
                 
                 phi = -temp[2]/radius/2 + 0.5
-                # invert theta to flip texture horizontally
                 theta = -math.atan2(temp[1], temp[0])/PI + 0.5 + angle_offset/2/PI
                 theta -= math.floor(theta)
                 
@@ -188,6 +195,9 @@ def load_texture(filename):
         return []
 
 def main():
+    # Parse command line arguments
+    args = parse_arguments()
+    
     # Read earth textures
     earth = load_texture('textures/earth.txt')
     earth_night = load_texture('textures/earth_night.txt')
@@ -196,8 +206,14 @@ def main():
         print("Failed to load textures. Make sure earth.txt and earth_night.txt exist in the current directory.")
         return
     
-    # Verify texture dimensions
+    # Print current settings
+    print(f"Earth Renderer Settings:")
+    print(f"Scale: {args.scale}")
+    print(f"Speed: {args.speed}x")
+    print(f"Tilt: {args.tilt}°")
     print(f"Texture dimensions: {len(earth[0])}x{len(earth)}")
+    print("\nPress Ctrl+C to exit...")
+    time.sleep(2)  # Give time to read settings
     
     angle_offset = 0
     
@@ -205,15 +221,17 @@ def main():
         cam = Camera(2, 0, 0)
         canvas = [[' ' for _ in range(WIDTH // dW)] for _ in range(HEIGHT // dH)]
         
-        cam.render_sphere(canvas, 1, angle_offset, earth, earth_night)
+        cam.render_sphere(canvas, 1, angle_offset, earth, earth_night, 
+                         scale=args.scale, tilt=args.tilt)
         
         # Display
         clear_screen()
         print('\n'.join(''.join(row) for row in canvas))
         goto_xy(0, 0)
         
-        angle_offset += 2*PI/18
-        time.sleep(0.1)  # Add small delay to control rotation speed
+        # Apply speed multiplier to rotation
+        angle_offset += (2*PI/18) * args.speed
+        time.sleep(0.1)  # Base delay
 
 if __name__ == "__main__":
     try:
