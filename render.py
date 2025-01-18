@@ -44,6 +44,8 @@ def magnitude(r):
 
 def normalize(r):
     mag = magnitude(r)
+    if mag == 0:
+        return r
     return [x/mag for x in r]
 
 def dot(a, b):
@@ -114,6 +116,14 @@ class Camera:
     def render_sphere(self, canvas, radius, angle_offset, earth, earth_night):
         light = [0, 999999, 0]  # Sun position
         
+        # Get dimensions of the texture
+        texture_height = len(earth)
+        texture_width = len(earth[0]) if texture_height > 0 else 0
+        
+        if texture_height == 0 or texture_width == 0:
+            print("Error: Invalid texture dimensions")
+            return
+        
         for yi in range(HEIGHT // dH):
             for xi in range(WIDTH // dW):
                 o = [self.x, self.y, self.z]
@@ -148,23 +158,45 @@ class Camera:
                 theta = math.atan2(temp[1], temp[0])/PI + 0.5 + angle_offset/2/PI
                 theta -= math.floor(theta)
                 
-                earthX = int(theta * 202)
-                earthY = int(phi * 80)
+                earthX = int(theta * (texture_width - 1))
+                earthY = int(phi * (texture_height - 1))
                 
-                if 0 <= earthY < 80 and 0 <= earthX < 202:
+                earthX = clamp(earthX, 0, texture_width - 1)
+                earthY = clamp(earthY, 0, texture_height - 1)
+                
+                try:
                     day = find_index(earth[earthY][earthX], PALETTE)
                     night = find_index(earth_night[earthY][earthX], PALETTE)
-                    index = int((1.0-luminance)*night + luminance*day)
-                    if 0 <= index < len(PALETTE):
+                    
+                    if day >= 0 and night >= 0:
+                        index = int((1.0-luminance)*night + luminance*day)
+                        index = clamp(index, 0, len(PALETTE) - 1)
                         draw_point(canvas, xi, yi, PALETTE[index])
+                except IndexError:
+                    continue
+
+def load_texture(filename):
+    try:
+        with open(filename, 'r') as file:
+            return [line.rstrip('\n') for line in file]
+    except FileNotFoundError:
+        print(f"Error: Could not find {filename}")
+        return []
+    except Exception as e:
+        print(f"Error loading {filename}: {str(e)}")
+        return []
 
 def main():
     # Read earth textures
-    with open('textures/earth.txt', 'r') as file:
-        earth = [line.strip() for line in file]
-        
-    with open('textures/earth_night.txt', 'r') as file:
-        earth_night = [line.strip() for line in file]
+    earth = load_texture('textures/earth.txt')
+    earth_night = load_texture('textures/earth_night.txt')
+    
+    if not earth or not earth_night:
+        print("Failed to load textures. Make sure earth.txt and earth_night.txt exist in the current directory.")
+        return
+    
+    # Verify texture dimensions
+    print(f"Texture dimensions: {len(earth[0])}x{len(earth)}")
     
     angle_offset = 0
     
@@ -188,3 +220,6 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         print("\nExiting...")
         sys.exit(0)
+    except Exception as e:
+        print(f"An error occurred: {str(e)}")
+        sys.exit(1)
