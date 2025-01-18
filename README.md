@@ -15,6 +15,7 @@ To get started, first clone the repository.
 
 ```bash
 git clone https://github.com/ColourlessSpearmint/ASCII-Globe.git
+cd ASCII-Globe
 ```
 
 Next, you must obtain texture files (`earth.txt` and `earth_night.txt`) and place them in the `textures/` directory. 
@@ -26,10 +27,15 @@ curl -o "textures/earth.txt" https://raw.githubusercontent.com/DinoZ1729/Earth/r
 curl -o "textures/earth_night.txt" https://raw.githubusercontent.com/DinoZ1729/Earth/refs/heads/master/earth_night.txt
 ```
 
-Texture files can also be created by downloading a map using the Mercator projection and using the following script to apply the texture generator.
+Texture files can also be aquired using the generate_texture.py script. Below is an example script that downloads maps images from NASA and applies the texture generator.
 
 ```bash
-(WIP)
+mkdir downloads
+curl -o "downloads/nasa_day.jpg" https://eoimages.gsfc.nasa.gov/images/imagerecords/74000/74218/world.200412.3x5400x2700.jpg
+curl -o "downloads/nasa_night.jpg" https://eoimages.gsfc.nasa.gov/images/imagerecords/144000/144896/BlackMarble_2012_01deg_gray.jpg
+mkdir textures
+python generate_texture.py --image_path downloads/nasa_day.jpg --output_path textures/earth.txt --ocean-colors 0,6,20 20,57,101 6,24,60 --threshold 10 --ocean-char .
+python generate_texture.py --image_path downloads/nasa_night.jpg --output_path textures/earth_night.txt
 ```
 
 ## Usage
