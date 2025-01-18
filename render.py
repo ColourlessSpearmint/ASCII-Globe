@@ -253,6 +253,7 @@ def main():
             
             angle_offset += (2*PI/18) * args.speed
             
+        frames.pop()  # Remove duplicate start and end frame
         print(f"\nSaving {len(frames)} frames to {args.output_file}...")
         with open(args.output_file, 'w') as f:
             json.dump({"frames": frames}, f)
