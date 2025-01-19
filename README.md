@@ -1,6 +1,4 @@
-<div align="center">
-    <img src="images\ascii_globe.gif" alt="a globe rendered entirely in ASCII text" width="256"/>
-</div>
+<img src="images\ascii_globe.gif" alt="a globe rendered entirely in ASCII text" width="300"/>
 
 # ASCII-Globe
 
@@ -13,6 +11,7 @@ ASCII-Globe is a Python script that renders a 3D representation of the Earth in 
 - Real-time rotation.
 - Adjustable scale, rotation speed, and axial tilt.
 - Toggle lighting/night effect.
+- Save frames and convert them to animated GIFs.
 
 ## Installation
 
@@ -25,7 +24,7 @@ cd ASCII-Globe
 
 Next, you must obtain texture files (`earth.txt` and `earth_night.txt`) and place them in the `textures/` directory. 
 
-This can be done by running the following script to download them from the [original repo](https://github.com/DinoZ1729) 
+This can be done by running the following script to download them from the [original repo](https://github.com/DinoZ1729/Earth) 
 
 ```bash
 curl -o "textures/earth.txt" https://raw.githubusercontent.com/DinoZ1729/Earth/refs/heads/master/earth.txt
@@ -45,23 +44,43 @@ python generate_texture.py --image_path downloads/nasa_night.jpg --output_path t
 
 ## Usage
 
+### Real-time Rendering
+
 Run the script with optional arguments to adjust the rendering settings:
 
 ```sh
-python render.py [--scale SCALE] [--speed SPEED] [--tilt TILT] [--sleep SLEEP] [--lighting LIGHTING]
+python render.py [--scale SCALE] [--speed SPEED] [--tilt TILT] [--sleep SLEEP] [--lighting LIGHTING] [--save-frames SAVE_FRAMES] [--output-file OUTPUT_FILE]
 ```
 
-## Arguments
+### Arguments for render.py
 - --scale: Scale of the Earth (default: 1.0)
 - --speed: Rotation speed multiplier (default: 1.0)
 - --tilt: Axial tilt in degrees (default: 23.5)
 - --sleep: Sleep to allow reading settings (default: True)
 - --lighting: Toggle lighting/night effect (default: True)
+- --save-frames: Save frames to JSON file (default: False)
+- --output-file: Output JSON file path (default: "earth_frames.json")
 
-## Example
+### Creating GIFs
+
+To convert saved frames to an animated GIF:
 
 ```sh
-python render.py --scale 1.5 --speed 2.0 --tilt 23.5 --sleep False --lighting False
+python frames_to_gif.py [--input-file INPUT_FILE] [--output-file OUTPUT_FILE] [--font_size FONT_SIZE] [--duration DURATION]
+```
+
+### Arguments for frames_to_gif.py
+- --input-file: Path to the input JSON file with frame data (default: "earth_frames.json")
+- --output-file: Path to the output GIF file (default: "animated_globe.gif")
+- --font_size: Font size for text rendering (default: 10)
+- --duration: Duration of each frame in milliseconds (default: 100)
+
+### Example
+
+Generate frames and create a GIF:
+```sh
+python render.py --scale 1.5 --speed 2.0 --tilt 23.5 --lighting True --save-frames True
+python frames_to_gif.py --font_size 12 --duration 120
 ```
 
 ## License
