@@ -49,7 +49,7 @@ python generate_texture.py --image_path downloads/nasa_night.jpg --output_path t
 Run the script with optional arguments to adjust the rendering settings:
 
 ```sh
-python render.py [--scale SCALE] [--speed SPEED] [--tilt TILT] [--sleep SLEEP] [--lighting LIGHTING] [--save-frames SAVE_FRAMES] [--output-file OUTPUT_FILE] 
+python render.py [--scale SCALE] [--speed SPEED] [--tilt TILT] [--sleep SLEEP] [--lighting LIGHTING] [--save-frames SAVE_FRAMES] [--output-file OUTPUT_FILE] [--override-max-scale OVERRIDE_MAX_SCALE]
 ```
 
 ### Arguments for render.py
@@ -60,6 +60,9 @@ python render.py [--scale SCALE] [--speed SPEED] [--tilt TILT] [--sleep SLEEP] [
 - --lighting: Toggle lighting/night effect (default: True)
 - --save-frames: Save frames to JSON file (default: False)
 - --output-file: Output JSON file path (default: "earth_frames.json")
+- --override-max-scale: Disable scale maximum (default: "False")
+
+Note that the scale maximum is due to the constraints of my rendering engine. I might fix this later. 
 
 ### Creating GIFs
 
@@ -79,7 +82,7 @@ python frames_to_gif.py [--input-file INPUT_FILE] [--output-file OUTPUT_FILE] [-
 
 Generate frames and create a GIF:
 ```sh
-python render.py --scale 1.5 --speed 2.0 --tilt 23.5 --lighting False --save-frames True
+python render.py --scale 0.5 --speed 2.0 --tilt 23.5 --lighting False --save-frames True
 python frames_to_gif.py --font_size 12 --duration 120 --square False
 ```
 

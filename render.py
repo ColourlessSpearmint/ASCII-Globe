@@ -16,6 +16,7 @@ dH = 8
 # Constants
 PI = math.pi
 PALETTE = " .:;',wiogOLXHWYV@"
+MAX_SCALE = 1.15
 
 # Default parameters
 DEFAULT_SCALE = 1.0
@@ -25,6 +26,7 @@ DEFAULT_SLEEP = True
 DEFAULT_LIGHTING = True
 DEFAULT_SAVE_FRAMES = False
 DEFAULT_OUTPUT_FILE = "earth_frames.json"
+DEFAULT_OVERRIDE_MAX_SCALE = False
 
 def str2bool(v):
     if isinstance(v, bool):
@@ -52,6 +54,8 @@ def parse_arguments():
                       help=f'Save frames to JSON file (default: {DEFAULT_SAVE_FRAMES})')
     parser.add_argument('--output-file', type=str, default=DEFAULT_OUTPUT_FILE,
                       help=f'Output JSON file path (default: {DEFAULT_OUTPUT_FILE})')
+    parser.add_argument('--override-max-scale', type=str2bool, default=DEFAULT_OVERRIDE_MAX_SCALE,
+                      help=f'Disable scale maximum (default: {DEFAULT_OVERRIDE_MAX_SCALE})')
     return parser.parse_args()
 
 def clear_screen():
@@ -219,6 +223,8 @@ def load_texture(filename):
 
 def main():
     args = parse_arguments()
+    if not args.override_max_scale:
+        assert args.scale <= MAX_SCALE, f"The maximum scale is {MAX_SCALE}; your scale, {args.scale}, is too large. Use --override-max-scale to bypass this."
     earth = load_texture('textures/earth.txt')
     earth_night = load_texture('textures/earth_night.txt')
     
