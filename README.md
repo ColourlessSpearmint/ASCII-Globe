@@ -49,7 +49,7 @@ python generate_texture.py --image_path downloads/nasa_night.jpg --output_path t
 Run the script with optional arguments to adjust the rendering settings:
 
 ```sh
-python render.py [--scale SCALE] [--speed SPEED] [--tilt TILT] [--sleep SLEEP] [--lighting LIGHTING] [--save-frames SAVE_FRAMES] [--output-file OUTPUT_FILE]
+python render.py [--scale SCALE] [--speed SPEED] [--tilt TILT] [--sleep SLEEP] [--lighting LIGHTING] [--save-frames SAVE_FRAMES] [--output-file OUTPUT_FILE] 
 ```
 
 ### Arguments for render.py
@@ -66,7 +66,7 @@ python render.py [--scale SCALE] [--speed SPEED] [--tilt TILT] [--sleep SLEEP] [
 To convert saved frames to an animated GIF:
 
 ```sh
-python frames_to_gif.py [--input-file INPUT_FILE] [--output-file OUTPUT_FILE] [--font_size FONT_SIZE] [--duration DURATION]
+python frames_to_gif.py [--input-file INPUT_FILE] [--output-file OUTPUT_FILE] [--font_size FONT_SIZE] [--duration DURATION] [--square SQAURE]
 ```
 
 ### Arguments for frames_to_gif.py
@@ -79,8 +79,8 @@ python frames_to_gif.py [--input-file INPUT_FILE] [--output-file OUTPUT_FILE] [-
 
 Generate frames and create a GIF:
 ```sh
-python render.py --scale 1.5 --speed 2.0 --tilt 23.5 --lighting True --save-frames True
-python frames_to_gif.py --font_size 12 --duration 120
+python render.py --scale 1.5 --speed 2.0 --tilt 23.5 --lighting False --save-frames True
+python frames_to_gif.py --font_size 12 --duration 120 --square False
 ```
 
 ## License
