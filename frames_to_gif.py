@@ -25,6 +25,16 @@ def resize_to_square(img):
     size = max(img.size)
     return img.resize((size, size), Image.LANCZOS)
 
+def str2bool(v):
+    if isinstance(v, bool):
+        return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
+    
 # Parse CLI arguments
 def parse_args():
     parser = argparse.ArgumentParser(description="Generate a square-cropped GIF from frames.")
@@ -32,6 +42,7 @@ def parse_args():
     parser.add_argument("--output-file", type=str, default="animated_globe.gif", help="Path to the output GIF file")
     parser.add_argument("--font_size", type=int, default=10, help="Font size for text rendering")
     parser.add_argument("--duration", type=int, default=100, help="Duration of each frame in milliseconds")
+    parser.add_argument("--square", type=str2bool, default=False, help="Toggle image resizing to square aspect ratio")
 
     return parser.parse_args()
 
@@ -42,7 +53,7 @@ def load_frames(input_file):
     return [frame for frame in data.get("frames", [])]
 
 # Main processing function
-def process_frames(input_file, output_file, font_size, duration):
+def process_frames(input_file, output_file, font_size, duration, square):
     # Load frames
     frames = load_frames(input_file)
 
@@ -68,7 +79,11 @@ def process_frames(input_file, output_file, font_size, duration):
     cropped_frames = [crop_to_content(frame, universal_bbox) for frame in rendered_frames]
 
     # Resize each cropped frame to a square
-    squared_frames = [resize_to_square(frame) for frame in cropped_frames]
+    # Note: this will cause the individual glyphs to become unreadable
+    if square:
+        squared_frames = [resize_to_square(frame) for frame in cropped_frames]
+    else:
+        squared_frames = cropped_frames
 
     # Convert frames to 'P' mode for GIF compatibility
     indexed_frames = [frame.convert("P", palette=Image.ADAPTIVE, colors=256) for frame in squared_frames]
@@ -89,4 +104,4 @@ def process_frames(input_file, output_file, font_size, duration):
 # Main execution
 if __name__ == "__main__":
     args = parse_args()
-    process_frames(args.input_file, args.output_file, args.font_size, args.duration)
+    process_frames(args.input_file, args.output_file, args.font_size, args.duration, args.square)
