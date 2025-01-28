@@ -1,2 +1,14 @@
+# Ignore the textures folder
 /textures
+
+# Ignore the downloads folder
 /downloads
+
+# Ignore all .json files
+*.json
+
+# Ignore all .gif files
+*.gif
+
+# Except .gif files in the images folder
+!images/*.gif
