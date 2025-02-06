@@ -15,12 +15,15 @@ ASCII-Globe is a Python script that renders a 3D representation of the Earth in 
 
 ## Installation
 
-To get started, first clone the repository.
+### Clone Repo
+First, clone the repository. This can be done by running the following script.
 
 ```bash
 git clone https://github.com/ColourlessSpearmint/ASCII-Globe.git
 cd ASCII-Globe
 ```
+
+### Texture Files
 
 Next, you must obtain texture files (`earth.txt` and `earth_night.txt`) and place them in the `textures/` directory. 
 
@@ -42,6 +45,14 @@ python generate_texture.py --image_path downloads/nasa_night.jpg --output_path t
 ```
 
 ## Usage
+
+### Example Usage
+
+Generate frames and create a GIF:
+```sh
+python render.py --scale 0.5 --speed 2.0 --tilt 23.5 --lighting False --save-frames True
+python frames_to_gif.py --font_size 12 --duration 120 --square False
+```
 
 ### Real-time Rendering
 
@@ -76,14 +87,6 @@ python frames_to_gif.py [--input-file INPUT_FILE] [--output-file OUTPUT_FILE] [-
 - --output-file: Path to the output GIF file (default: "animated_globe.gif")
 - --font_size: Font size for text rendering (default: 10)
 - --duration: Duration of each frame in milliseconds (default: 100)
-
-### Example
-
-Generate frames and create a GIF:
-```sh
-python render.py --scale 0.5 --speed 2.0 --tilt 23.5 --lighting False --save-frames True
-python frames_to_gif.py --font_size 12 --duration 120 --square False
-```
 
 ## License
 
